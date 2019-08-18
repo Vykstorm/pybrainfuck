@@ -74,7 +74,7 @@ def bf_exec(
 	output: Optional[IO]=None,
 	mem: Optional[Union[int, bytearray]]=None,
 	pointer: Optional[int]=None,
-	wrap_values: Optional[bool]=None, max_instructions: Optional[int]=None) -> Tuple[bytearray, int, SimpleNamespace]:
+	wrap_values: Optional[bool]=None, max_ops: Optional[int]=None) -> Tuple[bytearray, int, SimpleNamespace]:
 	'''
 	Execute the given brainfuck code.
 	:param code: Code to be executed; A string or bytes object.
@@ -95,7 +95,7 @@ def bf_exec(
 	:param wrap_values: If True, the byte 0XFF is converted to 0x00 when its incremented and viceversa when its decremented.
 	By default is False. If 0x00 is decremented or 0xFF incremented when this is set to False, raises OverflowError exception.
 
-	:param max_instructions: Maximum amount of instructions allowed for the interpreter. Reaching this limit will raise
+	:param max_ops: Maximum amount of instructions allowed for the interpreter. Reaching this limit will raise
 	RuntimeError exception. By default is 1000000 (1m).
 
 
@@ -148,13 +148,13 @@ def bf_exec(
 	else:
 		wrap_values = False
 
-	if max_instructions is not None:
-		if not isinstance(max_instructions, int):
+	if max_ops is not None:
+		if not isinstance(max_ops, int):
 			raise TypeError('Max instruction must be a number')
-		if max_instructions < 1:
+		if max_ops < 1:
 			raise ValueError('Max instructions must be a number greater than zero')
 	else:
-		max_instructions = 1000000
+		max_ops = 1000000
 
 
 	# Parse code and check for syntax errors
@@ -189,7 +189,7 @@ def bf_exec(
 		ops_count += 1
 
 		# Reached max instructions limit?
-		if ops_count > max_instructions:
+		if ops_count > max_ops:
 			raise RuntimeError
 
 
