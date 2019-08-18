@@ -9,7 +9,7 @@ from collections import deque
 
 
 
-def bf_parse(code: AnyStr) -> bytearray:
+def bf_parse(code: AnyStr) -> bytes:
 	'''
 	Validate and parse the given brainfuck code.
 	:param code: Must be brainfuck code to parse; A string or bytes object.
