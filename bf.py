@@ -168,14 +168,30 @@ def bf_exec(
 		mem = bytearray(mem)
 
 	# Initialize metrics
-	value_ops_count, pointer_ops_count, io_ops_count, jump_ops_count = repeat(0, times=4)
+	value_ops_count, pointer_ops_count, io_ops_count, jump_ops_count, ops_count = repeat(0, times=5)
 
 
-	k, goto = 0, deque()
+	k, goto, n = 0, deque(), len(code)
 
 
-	while k < len(code):
+	while k < n:
 		instr = code[k]
+
+		# Update metrics
+		if instr in (43, 45):
+			value_ops_count += 1
+		elif instr in (60, 62):
+			pointer_ops_count += 1
+		elif instr in (44, 46):
+			io_ops_count += 1
+		elif instr in (91, 93):
+			jump_ops_count += 1
+		ops_count += 1
+
+		# Reached max instructions limit?
+		if ops_count > max_instructions:
+			raise RuntimeError
+
 
 		if instr == 43: # increment value
 			if mem[pointer] == 0xFF and not wrap_values:
@@ -186,6 +202,7 @@ def bf_exec(
 			if mem[pointer] == 0x00 and not wrap_values:
 				raise OverflowError
 			mem[pointer] = (mem[pointer]+255)%256
+
 
 		elif instr == 62: # increment pointer
 			if pointer == len(mem)-1:
@@ -236,7 +253,8 @@ def bf_exec(
 		value_ops_count=value_ops_count,
 		pointer_ops_count=pointer_ops_count,
 		io_ops_count=io_ops_count,
-		jump_ops_count=jump_ops_count
+		jump_ops_count=jump_ops_count,
+		ops_count=ops_count
 	)
 	return mem, pointer, metrics
 
