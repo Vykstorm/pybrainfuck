@@ -11,59 +11,91 @@ from itertools import repeat
 
 
 
+class BrainfuckParser:
+	'''
+	This class validates and parse brainfuck code (checking properly for syntax errors).
+
+	e.g:
+	parse = BrainfuckParser()
+	parse(b'++[ >++.<- ] is a basic loop') # Returns b'++[>++.<-]'  (invalid chars are discarded)
+	parse(b'++[+]]-') -> Raises SyntaxError
+
+
+	It also allows interactive parsing (calling the parser multiple times)
+	e.g:
+	parse(b'+++++[.-') # Returns None because the sequence is incomplete
+	parse(b'-]+.') # Returns all the parsed code (b'+++++[.--]+.') as the sequence is completed.
+
+	'''
+	def __init__(self):
+		'''
+		Initialize the parser.
+		'''
+		self.level = 0
+		self.buffer = None
+
+
+	def __call__(self, *args, **kwargs):
+		# Its an alias of parse() method. It allows to use the parser as a callable object.
+		return self.parse(*args, **kwargs)
+
+
+
+	def parse(self, code: AnyStr) -> Union[bytes, None]:
+		
+		if not isinstance(code, (str, bytes)):
+			raise TypeError('Code must be a string or bytes obect')
+
+		if isinstance(code, str):
+			code = code.encode()
+
+
+		tokens = iter(code)
+		c, self.level = self.level, 0
+		buffer, self.buffer = self.buffer if self.buffer is not None else deque(), None
+
+		try:
+			while True:
+				# Read each token
+				token = next(tokens)
+
+				# Ignore invalid tokens
+				if token not in (43, 45, 62, 60, 91, 93, 44, 46):
+					continue
+
+				# Check syntax errors & update state
+				if token == 93:
+					if not buffer:
+						raise SyntaxError
+					prev = buffer[-1]
+					if c == 0 or prev == 91:
+						raise SyntaxError
+					c -= 1
+				else:
+					if token == 91:
+						c += 1
+
+				# Add token
+				buffer.append(token)
+
+		except StopIteration:
+			# Is the code valid but incomplete?
+			if c > 0:
+				self.level, self.buffer = c, buffer
+				return None
+
+		# Code valid & complete
+		return bytes(buffer)
+
+
+
+
 
 def bf_parse(code: AnyStr) -> bytes:
 	'''
-	Validate and parse the given brainfuck code.
-	:param code: Must be brainfuck code to parse; A string or bytes object.
-	
-	
-	Returns a byte array object where each byte is a valid brainfuck instruction. Will be one of this:
-	b',', b'.', b'<', '>', b'+', b'-', b'[', b']'
-	Raises SyntaxError if the code is not valid.
-	Returns None if the code is valid but its incomplete.
+	Its a shorthand for BrainfuckParser().parse
 	'''
-	if not isinstance(code, (str, bytes)):
-		raise TypeError('Code must be a string or bytes obect')
-
-	if isinstance(code, str):
-		code = code.encode()
-
-	instrs, c, tokens = deque(), 0, iter(code)
-	
-
-	try:
-		while True:
-			# Read each token
-			token = next(tokens)
-
-			# Ignore invalid tokens
-			if token not in (43, 45, 62, 60, 91, 93, 44, 46):
-				continue
-
-			# Check syntax errors & update state
-			if token == 93:
-				if not instrs:
-					raise SyntaxError
-				prev = instrs[-1]
-				if c == 0 or prev == 91:
-					raise SyntaxError
-				c -= 1
-			else:
-				if token == 91:
-					c += 1
-
-			# Add token
-			instrs.append(token)
-
-
-	except StopIteration:
-		# Is code incomplete?
-		if c > 0:
-			return None
-
-	# Code valid & complete
-	return bytes(instrs)
+	return BrainfuckParser().parse(code)
 
 
 
