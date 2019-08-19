@@ -266,7 +266,7 @@ def bf_exec(
 	Its a shorthand for:
 	BrainfuckInterpreter(input, output, mem_size, wrap_values, max_ops).exec(code)
 	'''
-	return BrainfuckInterpreter(code, input, output, mem_size, wrap_values, max_ops).exec(code)
+	return BrainfuckInterpreter(input, output, mem_size, wrap_values, max_ops).exec(code)
 
 
 
