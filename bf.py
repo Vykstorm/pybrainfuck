@@ -21,11 +21,10 @@ class BrainfuckParser:
 	parse(b'++[+]]-') -> Raises SyntaxError
 
 
-	It also allows interactive parsing (calling the parser multiple times)
+	It also allows interactive parsing (calling it multiple times)
 	e.g:
 	parse(b'+++++[.-') # Returns None because the sequence is incomplete
 	parse(b'-]+.') # Returns all the parsed code (b'+++++[.--]+.') as the sequence is completed.
-
 	'''
 	def __init__(self):
 		'''
@@ -41,6 +40,24 @@ class BrainfuckParser:
 
 
 	def parse(self, code: AnyStr) -> Union[bytes, None]:
+		'''
+		Parses the given brainfuck code:
+		First, all invalid symbols (different than +-><.,[]) are discarded.
+		Then:
+			* If it contains syntax errors, raises SyntaxError.
+			This happens if  ']' symbol appears before any '[' symbol.
+			Also occurs when the number of occurrences of ']' is greater than for '[' symbol.
+
+			* if the code is valid but incomplete (which happens when the number
+			of '[' symbols is greater than the amount of ']'), then its stored in a internal
+			buffer and the returned value is None.
+			
+			For any subsequent call to parse() method, the contents of the buffer will be appended
+			at the beginning of the new code (this allows interactive parsing).
+
+			* if the code is valid and complete, returns the code itself with all the invalid symbols
+			removed as a bytes object.
+		'''
 
 		if not isinstance(code, (str, bytes)):
 			raise TypeError('Code must be a string or bytes obect')
@@ -90,6 +107,32 @@ class BrainfuckParser:
 
 
 class BrainfuckInterpreter:
+	'''
+	Brainfuck code interpreter.
+	e.g:
+	bf = BrainfuckInterpreter()
+	bf.exec('++[.-]') # 210
+	
+	The memory state and the cursor position is saved accross different executions
+	using the same interpreter:
+
+	bf.exec('+++')       # Memory: 3 0 0 ... Cursor: 0
+	bf.exec('[>.++<-]>') # Memory: 0 6 0 ... Cursor: 1 
+	bf.exec('.<')		 # Memory: 0 6 0 ... Cursor: 0
+
+	The constructor parameters allows to specify alternative input/output streams rather than
+	stdin/stdout, set the memory size among other things:
+
+	buf = StringIO('123')
+	bf = BrainfuckInterpreter(input=buf, mem_size=2)
+	bf.exec('+++[>,++.<-]') # 345
+	
+	
+	Finally, exec() method returns execution metrics:
+	metrics = bf.exec('++[>+<-]')
+	print(metrics.value_ops_count)   # 6
+	print(metrics.pointer_ops_count) # 4
+	'''
 	def __init__(self,
 		input: Optional[IO]=None, output: Optional[IO]=None,
 		mem_size: Optional[int]=None, wrap_values: Optional[bool]=None, max_ops: Optional[int]=None):
@@ -141,6 +184,26 @@ class BrainfuckInterpreter:
 
 
 	def exec(self, code: AnyStr) -> SimpleNamespace:
+		'''
+		Executes the given brainfuck code with this interpreter.
+		The code must be valid and complete (otherwise it raises SyntaxError or EOFError)
+		
+		While the code is running:
+		- Trying to move the pointer with > and < instructions outside the bounds of the memory tape,
+		causes an IndexError
+
+		- If wrap_values parameter  is set to False, attempting to decrement a byte with the value 0x00 or
+		increment 0xFF, causes an OverflowError.
+
+		- If the number of instructions executed reaches the limit allowed (max_ops parameter), raises
+		RuntimeError
+		
+		Any exception raised while executing the code will halt the interpreter and save the current
+		memory and pointer state (for future calls to exec)
+
+		The returned value will be an object (SimpleNamespace) with execution metrics (number of
+		io instructions, number of value change operations, ...)
+		'''
 
 		# Parse code and check for syntax errors
 		code = BrainfuckParser().parse(code)
@@ -251,7 +314,21 @@ class BrainfuckInterpreter:
 
 def bf_parse(code: AnyStr) -> Union[bytes, None]:
 	'''
+	First, all invalid symbols (different than +-><.,[]) are discarded.
+	Then:
+		* If it contains syntax errors, raises SyntaxError.
+		This happens if  ']' symbol appears before any '[' symbol.
+		Also occurs when the number of occurrences of ']' is greater than for '[' symbol.
+
+		* if the code is valid but incomplete (which happens when the number
+		of '[' symbols is greater than the amount of ']'), returns None.
+		
+		* if the code is valid and complete, returns the code itself with all the invalid symbols
+		removed as a bytes object.
+
 	Its a shorthand for BrainfuckParser().parse(code)
+
+	Note: For interactive parsing, you should use BrainfuckParser class directly (read its docs)
 	'''
 	return BrainfuckParser().parse(code)
 
@@ -263,8 +340,20 @@ def bf_exec(
 	mem_size: Optional[int]=None, wrap_values: Optional[bool]=None,
 	max_ops: Optional[int]=None) -> SimpleNamespace:
 	'''
-	Its a shorthand for:
-	BrainfuckInterpreter(input, output, mem_size, wrap_values, max_ops).exec(code)
+	Executes the given brainfuck code.
+	The code must be valid and complete (otherwise it raises SyntaxError or EOFError)
+	
+	While the code is running:
+	- Trying to move the pointer with > and < instructions outside the bounds of the memory tape,
+	causes an IndexError
+
+	- If wrap_values parameter  is set to False, attempting to decrement a byte with the value 0x00 or
+	increment 0xFF, causes an OverflowError.
+
+	- If the number of instructions executed reaches the limit allowed (max_ops parameter), raises
+	RuntimeError
+	
+	Its a shorthand for BrainfuckInterpreter(input, output, mem_size, wrap_values, max_ops).exec(code).
 	'''
 	return BrainfuckInterpreter(input, output, mem_size, wrap_values, max_ops).exec(code)
 
