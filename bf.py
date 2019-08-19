@@ -40,7 +40,6 @@ class BrainfuckParser:
 		return self.parse(*args, **kwargs)
 
 
-
 	def parse(self, code: AnyStr) -> Union[bytes, None]:
 
 		if not isinstance(code, (str, bytes)):
@@ -130,9 +129,10 @@ class BrainfuckInterpreter:
 			max_ops = 1000000
 
 
-	self.input, self.output = input, output
-	self.wrap_values, self.max_ops = wrap_values, max_ops
-	self.mem, self.pointer = bytearray(mem_size), 0
+		self.input, self.output = input, output
+		self.wrap_values, self.max_ops = wrap_values, max_ops
+		self.mem, self.pointer = bytearray(mem_size), 0
+
 
 
 	def __call__(self, *args, **kwargs):
