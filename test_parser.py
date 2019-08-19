@@ -1,7 +1,7 @@
 
 import unittest
 from unittest import TestCase
-from bf import bf_parse, bf_exec
+from bf import *
 
 
 
