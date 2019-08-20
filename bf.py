@@ -193,7 +193,7 @@ class BrainfuckInterpreter:
 	def exec(self, code: AnyStr) -> SimpleNamespace:
 		'''
 		Executes the given brainfuck code with this interpreter.
-		The code must be valid and complete (otherwise it raises SyntaxError or EOFError)
+		The code must be valid and complete (otherwise it raises SyntaxError)
 		
 		While the code is running:
 		- Trying to move the pointer with > and < instructions outside the bounds of the memory tape,
@@ -204,7 +204,10 @@ class BrainfuckInterpreter:
 
 		- If the number of instructions executed reaches the limit allowed (max_ops parameter), raises
 		RuntimeError
+
+		- If the input stream is exhausted, and the read operation (,) is performed, OSError is raised.
 		
+
 		Any exception raised while executing the code will halt the interpreter and save the current
 		memory and pointer state (for future calls to exec)
 
@@ -216,7 +219,8 @@ class BrainfuckInterpreter:
 		code = BrainfuckParser().parse(code)
 		if code is None:
 			# Code is not complete
-			raise EOFError
+			raise SyntaxError
+
 
 		input, output = self.input, self.output
 		wrap_values, max_ops = self.wrap_values, self.max_ops
@@ -363,8 +367,4 @@ def bf_exec(
 	Its a shorthand for BrainfuckInterpreter(input, output, mem_size, wrap_values, max_ops).exec(code).
 	'''
 	return BrainfuckInterpreter(input, output, mem_size, wrap_values, max_ops).exec(code)
-
-
-
-
 
