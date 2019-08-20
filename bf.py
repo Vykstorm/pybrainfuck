@@ -2,7 +2,7 @@
 
 from typing import *
 from typing import IO
-from io import IOBase, BytesIO, StringIO
+from io import IOBase, BytesIO, StringIO, TextIOBase
 from sys import stdin, stdout
 from enum import IntEnum, unique
 from types import SimpleNamespace
@@ -275,7 +275,10 @@ class BrainfuckInterpreter:
 					pointer -= 1
 
 				elif instr == 46: # write to stdout
-					if output.write(chr(mem[pointer])) != 1:
+					ch = chr(mem[pointer])
+					if not isinstance(output, TextIOBase):
+						ch = ch.encode()
+					if output.write(chr(mem[pointer]).encode()) != 1:
 						raise EOFError
 					output.flush()
 
