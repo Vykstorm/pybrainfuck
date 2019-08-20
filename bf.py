@@ -205,8 +205,9 @@ class BrainfuckInterpreter:
 		- If the number of instructions executed reaches the limit allowed (max_ops parameter), raises
 		RuntimeError
 
-		- If the input stream is exhausted, and the read operation (,) is performed, OSError is raised.
-		
+		- If the input stream is exhausted, and the read operation (,) is performed, EOF is raised.
+		- If a write operation on the output stream (.) fails, EOF exception is raised also.
+
 
 		Any exception raised while executing the code will halt the interpreter and save the current
 		memory and pointer state (for future calls to exec)
@@ -274,11 +275,15 @@ class BrainfuckInterpreter:
 					pointer -= 1
 
 				elif instr == 46: # write to stdout
-					output.write(chr(mem[pointer]))
+					if output.write(chr(mem[pointer])) != 1:
+						raise EOFError
 					output.flush()
 
 				elif instr == 44: # read to stdout
-					mem[pointer] = ord(input.read(1))%256
+					data = input.read(1)
+					if len(data) != 1:
+						raise EOFError
+					mem[pointer] = ord(data)%256
 
 				elif instr == 91: # begin while
 					if mem[pointer]:
