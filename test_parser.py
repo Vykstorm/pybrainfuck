@@ -49,16 +49,26 @@ class TestParser(TestCase):
 			self.assertEqual(bf_parse(expr), None)
 
 
-		# The next codes must be valid and complete
-		for expr in (
-			b'[+-,><]', b'[-],+.', b'>[+-]<',
-			b'[+-][>.]', b'[>,]<-[>-.]', b'+-[+]><[-]-+',
-			b'[[+]]', b'[+-[+]]', b'[[>++<-]<-]', b'[>+[>+-<]<-]'
-			):
-			self.assertNotEqual(bf_parse(expr), None)
+
+	def test_interactive_parsing(self):
+		# BrainfuckParser class can be used to emulate interactive parsing
+		parser = BrainfuckParser()
+		self.assertEqual(parser.parse(b'++++['), None)
+		self.assertEqual(parser.parse(b'.-]'), b'++++[.-]')
+
+		self.assertEqual(parser.parse(b'++++['), None)
+		self.assertEqual(parser.parse(b'.-'), None)
+		self.assertEqual(parser.parse(b']'), b'++++[.-]')
 
 
+		self.assertEqual(parser.parse(b'++[>+++[>++++<-]<'), None)
+		self.assertEqual(parser.parse(b'-]'), b'++[>+++[>++++<-]<-]')
 
+
+	def test_parse_str(self):
+		# strings can be also parsed (they are encoded to bytes)
+		for expr in ('++--', '++[-].', ',[.-]', '++[>++<-]'):
+			self.assertEqual(bf_parse(expr), bf_parse(expr.encode()))
 
 
 if __name__ == '__main__':
