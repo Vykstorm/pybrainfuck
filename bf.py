@@ -2,7 +2,7 @@
 
 from typing import *
 from typing import IO
-from io import IOBase
+from io import IOBase, BytesIO, StringIO
 from sys import stdin, stdout
 from enum import IntEnum, unique
 from types import SimpleNamespace
@@ -134,12 +134,19 @@ class BrainfuckInterpreter:
 	print(metrics.pointer_ops_count) # 4
 	'''
 	def __init__(self,
-		input: Optional[IO]=None, output: Optional[IO]=None,
+		input: Optional[Union[IO, AnyStr]]=None, output: Optional[IO]=None,
 		mem_size: Optional[int]=None, wrap_values: Optional[bool]=None, max_ops: Optional[int]=None):
 
 		if input is not None:
-			if not isinstance(input, IOBase) or not input.readable():
-				raise TypeError('Input stream must be a readable IO object')
+			if not isinstance(input, (IOBase, str, bytes)):
+				raise TypeError('Input stream must be an IO, string or bytes object')
+			if isinstance(input, IOBase):
+				if not input.readable():
+					raise TypeError('Input stream must be a readable IO object')
+			elif isinstance(input, str):
+				input = StringIO(input)
+			else:
+				input = BytesIO(input)
 		else:
 			input = stdin
 
