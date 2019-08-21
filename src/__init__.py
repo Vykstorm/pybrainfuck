@@ -1,5 +1,11 @@
 
 
+# All public methods and classes of this module
+__all__ = ['bf_parse, bf_exec, BrainfuckParser, BrainfuckInterpreter', 'BrainfuckConsole']
+
+
+
+
 from typing import *
 from typing import IO
 from io import IOBase, BytesIO, StringIO, TextIOBase
@@ -8,7 +14,6 @@ from enum import IntEnum, unique
 from types import SimpleNamespace
 from collections import deque
 from itertools import repeat
-
 
 
 class BrainfuckParser:
