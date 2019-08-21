@@ -278,7 +278,7 @@ class BrainfuckInterpreter:
 					ch = chr(mem[pointer])
 					if not isinstance(output, TextIOBase):
 						ch = ch.encode()
-					if output.write(chr(mem[pointer]).encode()) != 1:
+					if output.write(ch) != 1:
 						raise EOFError
 					output.flush()
 
