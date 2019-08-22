@@ -42,7 +42,7 @@ if __name__ == '__main__':
 			if debug:
 				print()
 				print(">" * 40)
-				print("Number of instructions executed: ")
+				print("Number of instructions executed: {:8d}".format(metrics.ops_count))
 				print("- i/o (, and .):{:25d}".format(metrics.io_ops_count))
 				print("- byte modifications (+ and -):{:10d}".format(metrics.value_ops_count))
 				print("- pointer moves (< and >):{:15d}".format(metrics.pointer_ops_count))
@@ -62,8 +62,9 @@ if __name__ == '__main__':
 			print()
 			print(">" * 40)
 			print("Memory & pointer state (at the end):")
-			print("- Non-zero bytes: {}".format(
-				f"{nz_bytes_count}/{mem_size} (~{round(nz_bytes_count*100/mem_size, 2)}%)".rjust(32)
+			print("- Non-zero bytes: {} {}".format(
+				f"{nz_bytes_count}/{mem_size}".rjust(23),
+				f"(~{round(nz_bytes_count*100/mem_size, 2)}%)"
 				))
 
 			if nz_bytes_count > 0:
