@@ -27,9 +27,9 @@ class TestExamples(TestCase):
 	https://github.com/kavehmz/brainfuck_examples
 	http://www.hevanet.com/cristofd/brainfuck/
 	'''
-	def test_print0to99(self):
+	def test_numbers100(self):
 		buf = StringIO()
-		bf_exec(samples['print0to99'], output=buf, mem_size=100, max_ops=10000)
+		bf_exec(samples['numbers100'], output=buf, mem_size=100, max_ops=10000)
 		nums = list(map(int, buf.getvalue().split('\n')[:-1]))
 		self.assertEqual(nums, list(range(0, 100)))
 
