@@ -33,23 +33,34 @@ if __name__ == '__main__':
 	debug = args.debug
 	
 	try:
-		# Execute the code
-		interpreter = BrainfuckInterpreter(input, output, mem_size, wrap_values, max_ops)
-		metrics = interpreter.exec(code)
+		try:
+			# Execute the code
+			interpreter = BrainfuckInterpreter(input, output, mem_size, wrap_values, max_ops)
+			metrics = interpreter.exec(code)
 
-		# Print execution metrics
+			# Print execution metrics
+			if debug:
+				print()
+				print(">" * 40)
+				print("Number of instructions executed: ")
+				print("- i/o (, and .):{:25d}".format(metrics.io_ops_count))
+				print("- byte modifications (+ and -):{:10d}".format(metrics.value_ops_count))
+				print("- pointer moves (< and >):{:15d}".format(metrics.pointer_ops_count))
+				print("- jumps ([ and ]):{:23d}".format(metrics.jump_ops_count))
+				print("<" * 40)
+				print()
+
+		except (RuntimeError, OverflowError, IndexError) as e:
+			# Interpreter failed
+			print()
+			print(f"Interpreter halted ({e})")
+			print()
+
+		# Print memory & pointer state at the end of the execution (even if it fails)
 		if debug:
 			nz_bytes_count = sum(map(bool, interpreter.mem))
-
 			print()
 			print(">" * 40)
-			print("Number of instructions executed: ")
-			print("- i/o (, and .):{:25d}".format(metrics.io_ops_count))
-			print("- byte modifications (+ and -):{:10d}".format(metrics.value_ops_count))
-			print("- pointer moves (< and >):{:15d}".format(metrics.pointer_ops_count))
-			print("- jumps ([ and ]):{:23d}".format(metrics.jump_ops_count))
-
-			print()
 			print("Memory & pointer state (at the end):")
 			print("- Non-zero bytes: {}".format(
 				f"{nz_bytes_count}/{mem_size} (~{round(nz_bytes_count*100/mem_size, 2)}%)".rjust(32)
@@ -61,10 +72,6 @@ if __name__ == '__main__':
 			print("- Pointer position:{:22d}".format(interpreter.pointer))
 			print("<" * 40)
 			print()
-
-
-
-			#print(metrics)
 
 
 	except (TypeError, ValueError) as e:
