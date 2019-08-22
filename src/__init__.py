@@ -1,7 +1,7 @@
 
 
 # All public methods and classes of this module
-__all__ = ['bf_parse, bf_exec, BrainfuckParser, BrainfuckInterpreter', 'BrainfuckConsole']
+__all__ = ['bf_parse', 'bf_exec', 'BrainfuckParser', 'BrainfuckInterpreter']
 
 
 
