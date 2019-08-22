@@ -366,6 +366,7 @@ def bf_parse(code: Union[AnyStr, IO]) -> Union[bytes, None]:
 def bf_exec(
 	code: Union[AnyStr, IO],
 	input: Optional[Union[AnyStr, IO]]=None, output: Optional[IO]=None,
+	input: Optional[AnyStr, IO]=None, output: Optional[IO]=None,
 	mem_size: Optional[int]=None, wrap_values: Optional[bool]=None,
 	max_ops: Optional[int]=None) -> SimpleNamespace:
 	'''
