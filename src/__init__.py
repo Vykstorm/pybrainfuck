@@ -282,7 +282,7 @@ class BrainfuckInterpreter:
 
 				# Reached max instructions limit?
 				if ops_count > max_ops:
-					raise RuntimeError
+					raise RuntimeError('Reached the maximum number of executed instructions allowed')
 
 
 				if instr == 43: # increment value
