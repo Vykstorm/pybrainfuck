@@ -48,5 +48,15 @@ class TestExamples(TestCase):
 			a, b = b, a+b
 
 
+	def test_squares(self):
+		buf = StringIO()
+		try:
+			bf_exec(samples['squares'], output=buf, mem_size=20, max_ops=100000)
+		except RuntimeError:
+			pass
+		nums = list(map(int, buf.getvalue().split('\n')[:-1]))
+		self.assertEqual([x ** 2 for x in range(26)], nums)
+
+
 if __name__ == '__main__':
 	unittest.main()
