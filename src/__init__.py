@@ -13,7 +13,7 @@ from sys import stdin, stdout
 from enum import IntEnum, unique
 from types import SimpleNamespace
 from collections import deque
-from itertools import repeat
+from itertools import repeat, islice
 
 
 class BrainfuckParser:
@@ -79,12 +79,15 @@ class BrainfuckParser:
 		tokens = iter(code) # iterator that returns tokens one by one
 		c, self.level = self.level, 0
 		buffer, self.buffer = self.buffer if self.buffer is not None else deque(), None
-		line, col = 1, 1    # For debugging purposes to generate syntax errors
+
+		# For debugging purposes to generate syntax errors
+		line, col, seen_tokens = 1, 1, deque(maxlen=20)
 
 		try:
 			while True:
 				# Read each token
 				token = next(tokens)
+				seen_tokens.append(token)
 
 				if token == 10:
 					# If token is the new line character, ignore it and increment line count
@@ -122,7 +125,12 @@ class BrainfuckParser:
 
 		except SyntaxError as e:
 			# Localize syntax errors (line & column)
-			raise SyntaxError(f"{e} (at line {line}, column {col})")
+			raise SyntaxError("{}   line {}, column {}\n{}\nSyntaxError: {}".format(
+					bytes(list(seen_tokens) + list(islice(tokens, 15))).decode(),
+					line, col,
+					'^'.rjust(col-1),
+					e
+				))
 
 		# Code valid & complete
 		return bytes(buffer)
@@ -244,7 +252,7 @@ class BrainfuckInterpreter:
 		code = BrainfuckParser().parse(code)
 		if code is None:
 			# Code is not complete
-			raise SyntaxError
+			raise SyntaxError('Reached end of file while parsing')
 
 
 		input, output = self.input, self.output

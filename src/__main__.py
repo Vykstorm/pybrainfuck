@@ -53,7 +53,7 @@ if __name__ == '__main__':
 		except (RuntimeError, OverflowError, IndexError) as e:
 			# Interpreter failed
 			print()
-			print(f"Interpreter halted ({e})")
+			print(f"Interpreter halted: {e}")
 			print()
 
 		# Print memory & pointer state at the end of the execution (even if it fails)
@@ -75,6 +75,10 @@ if __name__ == '__main__':
 			print()
 
 
+	except SyntaxError as e:
+		print()
+		print(f"Syntax error: {e}")
+		print()
+
 	except (TypeError, ValueError) as e:
 		parser.error(e)
-
