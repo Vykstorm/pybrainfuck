@@ -44,7 +44,7 @@ class BrainfuckParser:
 		return self.parse(*args, **kwargs)
 
 
-	def parse(self, code: AnyStr) -> Union[bytes, None]:
+	def parse(self, code: Union[AnyStr, IO]) -> Union[bytes, None]:
 		'''
 		Parses the given brainfuck code:
 		First, all invalid symbols (different than +-><.,[]) are discarded.
@@ -64,8 +64,13 @@ class BrainfuckParser:
 			removed as a bytes object.
 		'''
 
-		if not isinstance(code, (str, bytes)):
-			raise TypeError('Code must be a string or bytes obect')
+		if not isinstance(code, (str, bytes, IOBase)):
+			raise TypeError('Code must be a string, bytes or IO obect')
+
+		if isinstance(code, IOBase):
+			if not code.readable():
+				raise ValueError('Code must be a readable IO object')
+			code = code.read()
 
 		if isinstance(code, str):
 			code = code.encode()
@@ -195,7 +200,7 @@ class BrainfuckInterpreter:
 		return self.exec(*args, **kwargs)
 
 
-	def exec(self, code: AnyStr) -> SimpleNamespace:
+	def exec(self, code: Union[AnyStr, IO]) -> SimpleNamespace:
 		'''
 		Executes the given brainfuck code with this interpreter.
 		The code must be valid and complete (otherwise it raises SyntaxError)
@@ -336,7 +341,7 @@ class BrainfuckInterpreter:
 
 
 
-def bf_parse(code: AnyStr) -> Union[bytes, None]:
+def bf_parse(code: Union[AnyStr, IO]) -> Union[bytes, None]:
 	'''
 	First, all invalid symbols (different than +-><.,[]) are discarded.
 	Then:
@@ -359,7 +364,7 @@ def bf_parse(code: AnyStr) -> Union[bytes, None]:
 
 
 def bf_exec(
-	code: AnyStr,
+	code: Union[AnyStr, IO],
 	input: Optional[IO]=None, output: Optional[IO]=None,
 	mem_size: Optional[int]=None, wrap_values: Optional[bool]=None,
 	max_ops: Optional[int]=None) -> SimpleNamespace:
