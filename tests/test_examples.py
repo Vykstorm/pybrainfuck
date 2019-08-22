@@ -6,6 +6,7 @@ from re import match
 from os import listdir
 from os.path import join
 from io import BytesIO, StringIO
+from collections import deque
 
 
 samples = {}
@@ -24,15 +25,27 @@ class TestExamples(TestCase):
 
 	They are extracted from:
 	https://github.com/kavehmz/brainfuck_examples
-	
+	http://www.hevanet.com/cristofd/brainfuck/
 	'''
 	def test_print0to99(self):
 		buf = StringIO()
-		bf_exec(samples['print0to99'], output=buf, mem_size=2**10, max_ops=2**13)
+		bf_exec(samples['print0to99'], output=buf, mem_size=100, max_ops=10000)
 		nums = list(map(int, buf.getvalue().split('\n')[:-1]))
 		self.assertEqual(nums, list(range(0, 100)))
 
 
+	def test_fib(self):
+		buf = StringIO()
+		try:
+			bf_exec(samples['fib'], output=buf, mem_size=100, max_ops=10000)
+		except RuntimeError:
+			pass
+		nums = deque(map(int, buf.getvalue().split('\n')[:-1]))
+		self.assertEqual(nums.popleft(), 0)
+		a, b = 0, 1
+		while len(nums) > 0:
+			self.assertEqual(nums.popleft(), b)
+			a, b = b, a+b
 
 
 if __name__ == '__main__':
