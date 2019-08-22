@@ -279,23 +279,23 @@ class BrainfuckInterpreter:
 
 				if instr == 43: # increment value
 					if mem[pointer] == 0xFF and not wrap_values:
-						raise OverflowError
+						raise OverflowError('Incrementing the byte 0xFF is not allowed')
 					mem[pointer] = (mem[pointer]+1)%256
 
 				elif instr == 45: # decrement value
 					if mem[pointer] == 0x00 and not wrap_values:
-						raise OverflowError
+						raise OverflowError('Decrementing the byte 0x00 is not allowed')
 					mem[pointer] = (mem[pointer]+255)%256
 
 
 				elif instr == 62: # increment pointer
 					if pointer == len(mem)-1:
-						raise IndexError
+						raise IndexError('Memory pointer out of bounds')
 					pointer += 1
 
 				elif instr == 60: # decrement pointer
 					if pointer == 0:
-						raise IndexError
+						raise IndexError('Memory pointer out of bounds')
 					pointer -= 1
 
 				elif instr == 46: # write to stdout
@@ -303,13 +303,13 @@ class BrainfuckInterpreter:
 					if not isinstance(output, TextIOBase):
 						ch = ch.encode()
 					if output.write(ch) != 1:
-						raise EOFError
+						raise EOFError('Output stream write operation failed')
 					output.flush()
 
 				elif instr == 44: # read to stdout
 					data = input.read(1)
 					if len(data) != 1:
-						raise EOFError
+						raise EOFError('Input stream read operation failed')
 					mem[pointer] = ord(data)%256
 
 				elif instr == 91: # begin while
