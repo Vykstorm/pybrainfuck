@@ -76,14 +76,22 @@ class BrainfuckParser:
 			code = code.encode()
 
 
-		tokens = iter(code)
+		tokens = iter(code) # iterator that returns tokens one by one
 		c, self.level = self.level, 0
 		buffer, self.buffer = self.buffer if self.buffer is not None else deque(), None
+		line, col = 1, 1    # For debugging purposes to generate syntax errors
 
 		try:
 			while True:
 				# Read each token
 				token = next(tokens)
+
+				if token == 10:
+					# If token is the new line character, ignore it and increment line count
+					line, col = line+1, 1
+					continue
+				else:
+					col += 1
 
 				# Ignore invalid tokens
 				if token not in (43, 45, 62, 60, 91, 93, 44, 46):
@@ -91,11 +99,13 @@ class BrainfuckParser:
 
 				# Check syntax errors & update state
 				if token == 93:
-					if not buffer:
-						raise SyntaxError
+					if len(buffer) == 0:
+						raise SyntaxError("Unexpected ']' symbol")
 					prev = buffer[-1]
-					if c == 0 or prev == 91:
-						raise SyntaxError
+					if prev == 91:
+						raise SyntaxError("Unexpected ']' right after ']' symbol")
+					if c == 0:
+						raise SyntaxError("Unexpected ']' symbol")
 					c -= 1
 				else:
 					if token == 91:
@@ -109,6 +119,10 @@ class BrainfuckParser:
 			if c > 0:
 				self.level, self.buffer = c, buffer
 				return None
+
+		except SyntaxError as e:
+			# Localize syntax errors (line & column)
+			raise SyntaxError(f"{e} (at line {line}, column {col})")
 
 		# Code valid & complete
 		return bytes(buffer)
