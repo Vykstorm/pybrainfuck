@@ -1,23 +1,24 @@
 
 import unittest
 from unittest import TestCase
-from bf import *
+from src import *
 from re import match
 from os import listdir
+from os.path import join
 from io import BytesIO, StringIO
 
 
 samples = {}
 for filename in listdir('examples'):
 	name = match(r'(.+)\..+$', filename).group(1)
-	with open(f'examples/{filename}', 'r') as file:
+	with open(join('examples', filename), 'r') as file:
 		samples[name] = file.read()
 
 
 
 class TestExamples(TestCase):
 	'''
-	This provides a set of tests that executes brainfuck code examples and verifies
+	This provides a set of tests which executes brainfuck code examples and verifies
 	that the result written on the output stream is the expected.
 	The examples are stored in the "examples/" directory
 
