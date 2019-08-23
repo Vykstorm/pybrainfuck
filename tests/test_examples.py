@@ -58,5 +58,20 @@ class TestExamples(TestCase):
 		self.assertEqual([x ** 2 for x in range(26)], nums)
 
 
+	def test_factorial(self):
+		buf = StringIO()
+		try:
+			bf_exec(samples['factorial'], output=buf, mem_size=1000, max_ops=100000)
+		except RuntimeError:
+			pass
+		nums = deque(map(int, buf.getvalue().split('\n')[:-1]))
+		nums.popleft()
+		a, b = 1, 1
+		while len(nums) > 0:
+			self.assertEqual(nums.popleft(), b)
+			a += 1
+			b *= a
+
+
 if __name__ == '__main__':
 	unittest.main()
